@@ -1,40 +1,95 @@
-
 const express = require("express");
 const router = express.Router();
-const User = require('../model/userModel')
+const userdetail = require("../model/userModel");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+//  Secret key for JWT – move this to .env in real apps
+const JWT_SECRET = "yourSecretKey"; // you can use process.env.JWT_SECRET
 
-// Sign Up
-router.post("/", async (req, res) => {
+// SIGNUP
+router.post("/signup", async (req, res) => {
   try {
     const { username, email, password, address } = req.body;
-    //check username length more than 4
-    if (username.length < 4) {
-      return res
-        .status(400)
-        .json({ message: "Username length should be greather than 3" });
-    }
-    // check  username already exits ?
-    const existingusername = await User.find({ username: username });
-    if (existingusername) {
-      return res.status(400).json({ message: "Username already exist.." });
-    }
-    // check  username already exits ?
-    const existingemail = await User.find({ email: email });
-    if (existingemail) {
-      return res.status(400).json({ message: "Username already exist.." });
+
+    if (!username || !email || !password || !address) {
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    //  check password length
+    const existingUsername = await userdetail.findOne({ username });
+    if (existingUsername) {
+      return res.status(400).json({ message: "Username already exists" });
+    }
+
+    const existingEmail = await userdetail.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
     if (password.length <= 5) {
       return res
         .status(400)
-        .json({ message: "Password length  should be greather than 3" });
+        .json({ message: "Password should be greater than 5 characters" });
     }
-    const newUser = new User({username:username,email,password,address});
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new userdetail({
+      username,
+      email,
+      password: hashedPassword,
+      address,
+    });
+
     await newUser.save();
-    res.status(201).json({ message: "User registered successfully" });
+
+    return res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error.." });
+    console.error("Signup error:", error.message);
+    res.status(500).json({ message: error.message || "Internal server error" });
+  }
+});
+
+// SIGNIN
+router.post("/signin", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and password are required" });
+    }
+
+    const existingUser = await userdetail.findOne({ username });
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(password, existingUser.password); 
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid password" });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { userId: existingUser._id, username: existingUser.username,role:existingUser.role },
+      JWT_SECRET,
+      { expiresIn: "30d" }
+    );
+
+    // Respond with token
+    return res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        id: existingUser._id,
+        username: existingUser.username,
+        email: existingUser.email,
+        address: existingUser.address,
+        role:existingUser.role 
+      },
+    });
+  } catch (error) {
+    console.error("Signin error:", error.message);
+    res.status(500).json({ message: error.message || "Internal server error" });
   }
 });
 
