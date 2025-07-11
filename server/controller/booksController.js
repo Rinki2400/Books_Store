@@ -1,9 +1,9 @@
 const books = require("../model/bookModel");
 const userdetail = require("../model/userModel"); // import user model if not already
-//add books
+//add books--admin
 const addBooks = async (req, res) => {
   try {
-    const { id } = req.params; 
+    const { id } = req.params;
 
     const user = await userdetail.findById(id);
 
@@ -21,16 +21,15 @@ const addBooks = async (req, res) => {
       message: "Book added successfully",
       book: savedBook,
     });
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// update book
+// update book --admin
 const updateBooks = async (req, res) => {
   try {
-    const { id, bookId } = req.params; 
+    const { id, bookId } = req.params;
     const updateData = req.body;
     const user = await userdetail.findById(id);
     if (!user || user.role !== "Admin") {
@@ -39,8 +38,8 @@ const updateBooks = async (req, res) => {
       });
     }
     const updatedBook = await books.findByIdAndUpdate(bookId, updateData, {
-      new: true, 
-      runValidators: true, 
+      new: true,
+      runValidators: true,
     });
     if (!updatedBook) {
       return res.status(404).json({ message: "Book not found." });
@@ -54,8 +53,26 @@ const updateBooks = async (req, res) => {
   }
 };
 
+//delete book by  id --admin
+const deleteBooks = async (req, res) => {
+  try {
+    const { id, bookId } = req.params;
+    const user = await userdetail.findById(id);
+    if (!user || user.role !== "Admin") {
+      return res.status(403).json({
+        message: "Access denied! Only admin can delete books.",
+      });
+    }
+    const deleteBook = await books.findByIdAndDelete(bookId);
+    if (!deleteBook) {
+      return res.status(404).json({ message: "Book not found." });
+    }
+    res
+      .status(200)
+      .json({ message: "Book deleted successfully", book: deleteBook });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
-module.exports = { addBooks, updateBooks};
-
-
-
+module.exports = { addBooks, updateBooks,deleteBooks };
