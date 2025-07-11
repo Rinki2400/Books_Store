@@ -1,6 +1,6 @@
 const express = require("express");
 const { signup, signin ,getUser,getUserById,updateById} = require("../controller/userController");
-const { addBooks} = require("../controller/booksController");
+const { addBooks,updateBooks} = require("../controller/booksController");
 const authenticateToken = require("./UserAuth");
 const router = express.Router();
 
@@ -19,4 +19,5 @@ router.put("/users/:id",authenticateToken, updateById);
 
 //create Book
 router.post('/addbook/:id',authenticateToken,addBooks);
+router.put('/addbook/:id/:bookId',authenticateToken,updateBooks);
 module.exports = router;
