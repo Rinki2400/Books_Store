@@ -1,5 +1,6 @@
 const express = require("express");
 const { signup, signin ,getUser,getUserById,updateById} = require("../controller/userController");
+const { addBooks} = require("../controller/booksController");
 const authenticateToken = require("./UserAuth");
 const router = express.Router();
 
@@ -9,6 +10,13 @@ router.post("/signup", signup);
 router.post("/signin",signin );
 // get all use
 router.get("/users",authenticateToken, getUser);
+//get all user by id
 router.get("/users/:id",authenticateToken, getUserById);
-router.put("/users/:id", updateById);
+//update address by id
+router.put("/users/:id",authenticateToken, updateById);
+
+
+
+//create Book
+router.post('/addbook/:id',authenticateToken,addBooks);
 module.exports = router;
