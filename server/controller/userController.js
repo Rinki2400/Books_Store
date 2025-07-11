@@ -1,7 +1,7 @@
 const userdetail = require("../model/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
+const mongoose = require("mongoose");
 const JWT_SECRET = "yourSecretKey";
 
 // SIGNUP
@@ -42,7 +42,7 @@ const signup = async (req, res) => {
 
     return res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    console.error("Signup error:", error.message);
+    console.error(" error:", error.message);
     res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
@@ -90,30 +90,67 @@ const signin = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Signin error:", error.message);
+    console.error("error:", error.message);
     res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
 
-const getUser = async (req,res) =>{
-try {
-    const users = await userdetail.find().select("-password");
-     res.status(200).json(users);
-} catch (error) {
-    console.error("Signin error:", error.message);
-    res.status(500).json({ message: error.message || "Internal server error" });
-}
-};
-const getUserById = async (req,res) => {
+const getUser = async (req, res) => {
   try {
-    const userId = req.params.id;
-    const users = await userdetail.findById(userId).select("-password");
-     res.status(200).json(users);
+    const users = await userdetail.find().select("-password");
+    res.status(200).json(users);
   } catch (error) {
     console.error("Signin error:", error.message);
     res.status(500).json({ message: error.message || "Internal server error" });
-}
   }
+};
+const getUserById = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const users = await userdetail.findById(userId).select("-password");
+    res.status(200).json(users);
+  } catch (error) {
+    console.error(" error:", error.message);
+    res.status(500).json({ message: error.message || "Internal server error" });
+  }
+};
 
+const updateById = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { address } = req.body;
 
-module.exports = { signup, signin ,getUser,getUserById};
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid user ID format" });
+    }
+
+    // Validate address input
+    if (!address || typeof address !== "string" || address.trim() === "") {
+      return res.status(400).json({ message: "Invalid or missing address" });
+    }
+
+    // Update logic
+    const data = await userdetail.findByIdAndUpdate(
+      userId,
+      { address },
+      { new: true, runValidators: true }
+    );
+
+    if (!data) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      message: "Address updated successfully",
+      user: data,
+    });
+  } catch (error) {
+    console.error("Update error:", error.message);
+    return res.status(500).json({
+      message: error.message || "Internal server error",
+    });
+  }
+};
+
+module.exports = { signup, signin, getUser, getUserById, updateById };
