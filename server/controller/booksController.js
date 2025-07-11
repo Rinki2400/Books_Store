@@ -69,10 +69,32 @@ const deleteBooks = async (req, res) => {
     }
     res
       .status(200)
-      .json({ message: "Book deleted successfully", book: deleteBook });
+      .json({ message: "Book deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+//get all book
+const getAllBooks = async (req, res) => {
+  try {
+    const book = await books.find().sort({ createdAt: -1 }); 
+    res.status(200).json({ message: "Success", book }); 
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-module.exports = { addBooks, updateBooks,deleteBooks };
+//get book limit-4
+
+const getBooklimit = async (req, res) => {
+  try {
+    const count = parseInt(req.query.count) || 4;
+    const booksList = await books.find().sort({ createdAt: -1 }).limit(count);
+    res.status(200).json({ message: "Books fetched", books: booksList });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+module.exports = { addBooks, updateBooks,deleteBooks,getAllBooks ,getBooklimit};

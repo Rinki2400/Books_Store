@@ -1,6 +1,6 @@
 const express = require("express");
 const { signup, signin ,getUser,getUserById,updateById} = require("../controller/userController");
-const { addBooks,updateBooks,deleteBooks} = require("../controller/booksController");
+const { addBooks,updateBooks,deleteBooks,getAllBooks,getBooklimit} = require("../controller/booksController");
 const authenticateToken = require("./UserAuth");
 const router = express.Router();
 
@@ -21,4 +21,6 @@ router.put("/users/:id",authenticateToken, updateById);
 router.post('/addbook/:id',authenticateToken,addBooks);
 router.put('/addbook/:id/:bookId',authenticateToken,updateBooks);
 router.delete('/addbook/:id/:bookId',authenticateToken,deleteBooks);
+router.get('/addbook',getAllBooks);
+router.get('/addbook/limit',getBooklimit);
 module.exports = router;
