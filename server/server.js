@@ -11,6 +11,6 @@ app.use(express.json());
 
 app.use('/api',require('./router/Routes'));
 app.use('/apibook',require('./router/bookRoutes'));
-app.use('/apiUser',require('./router/Routes'));
+app.use('/apiUser',require('./router/userRoutes'));
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
