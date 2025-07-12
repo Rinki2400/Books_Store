@@ -9,6 +9,8 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
-app.use('/user',require('./router/userRoutes'));
+app.use('/api',require('./router/Routes'));
+app.use('/apibook',require('./router/bookRoutes'));
+app.use('/apiUser',require('./router/Routes'));
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

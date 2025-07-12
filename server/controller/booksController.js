@@ -88,13 +88,21 @@ const getAllBooks = async (req, res) => {
 
 const getBooklimit = async (req, res) => {
   try {
-    const count = parseInt(req.query.count) || 4;
-    const booksList = await books.find().sort({ createdAt: -1 }).limit(count);
+    const booksList = await books.find().sort({ createdAt: -1 }).limit(4);
     res.status(200).json({ message: "Books fetched", books: booksList });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+const getBookById = async(req,res) => {
+  try {
+    const {id} = req.params;
+    const data = await books.findById(id)
+     res.status(200).json({ message: "Books fetched", data});
+  } catch (error) {
+     res.status(500).json({ error: error.message });
+  }
+}
 
-module.exports = { addBooks, updateBooks,deleteBooks,getAllBooks ,getBooklimit};
+module.exports = { addBooks, updateBooks,deleteBooks,getAllBooks ,getBooklimit,getBookById};
